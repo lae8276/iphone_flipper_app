@@ -11,7 +11,6 @@ BASE_URL = "https://www.ebay.co.uk"
 SEARCH_URL = "https://www.ebay.co.uk/sch/i.html"
 HEADERS = {"User-Agent": "Mozilla/5.0 (CodeCopilot/1.0)"}
 
-
 def build_query_url(query="iphone", page=1):
     params = {
         "_nkw": query,
@@ -23,7 +22,6 @@ def build_query_url(query="iphone", page=1):
         "rt": "nc"
     }
     return f"{SEARCH_URL}?{'&'.join(f'{k}={v}' for k, v in params.items())}"
-
 
 def extract_listing_data(item):
     try:
@@ -39,7 +37,7 @@ def extract_listing_data(item):
         storage = storage_match.group(1) + "GB" if storage_match else "Unknown"
 
         price_tag = item.select_one(".s-item__price")
-        price = price_tag.text.replace("£", "").strip() if price_tag else "Unknown"
+        price = price_tag.text.replace("\u00a3", "").strip() if price_tag else "Unknown"
 
         bids_tag = item.select_one(".s-item__bids")
         bids = bids_tag.text.strip().split()[0] if bids_tag else "0"
@@ -66,7 +64,6 @@ def extract_listing_data(item):
     except:
         return None
 
-
 def scrape_ebay_auctions(query="iphone", pages=3, delay=1):
     results = []
     for page in range(1, pages + 1):
@@ -81,15 +78,14 @@ def scrape_ebay_auctions(query="iphone", pages=3, delay=1):
         time.sleep(delay)
     return pd.DataFrame(results)
 
-
 # --- Streamlit App ---
 st.set_page_config(page_title="eBay iPhone Resale Scraper", layout="wide")
-st.title("📱 iPhone Resale Auction Scanner (eBay UK)")
+st.title("\ud83d\udcf1 iPhone Resale Auction Scanner (eBay UK)")
 
 query = st.text_input("Search term", "iphone")
 pages = st.slider("How many pages to scan?", 1, 10, 3)
 
-if st.button("🔍 Scrape Listings"):
+if st.button("\ud83d\udd0d Scrape Listings"):
     with st.spinner("Scraping..."):
         df = scrape_ebay_auctions(query, pages)
         if not df.empty:
@@ -97,6 +93,6 @@ if st.button("🔍 Scrape Listings"):
             st.dataframe(df)
 
             csv = df.to_csv(index=False).encode("utf-8")
-            st.download_button("📥 Download CSV", data=csv, file_name="iphone_auctions.csv", mime="text/csv")
+            st.download_button("\ud83d\udcc5 Download CSV", data=csv, file_name="iphone_auctions.csv", mime="text/csv")
         else:
             st.warning("No results found.")
